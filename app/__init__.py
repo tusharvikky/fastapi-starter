@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -6,7 +6,7 @@ from app.views import home_router
 from app.views.v1 import sub_router as v1_router
 from core.config import config
 from core.exceptions import CustomException
-from core.fastapi.dependencies import Logging
+from core.fastapi.dependencies import Logging, AppOrigin
 from core.fastapi.middlewares import (
     SQLAlchemyMiddleware,
     AuthenticationMiddleware,
@@ -18,6 +18,7 @@ def init_cors(app: FastAPI) -> None:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
+        allow_origin_regex='https://.*\.domain\.com' if config.ENV == "production" else 'http://*',
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -26,7 +27,7 @@ def init_cors(app: FastAPI) -> None:
 
 def init_routers(app: FastAPI) -> None:
     app.include_router(home_router)
-    app.include_router(v1_router, prefix="/api/v1", tags=["User"])
+    app.include_router(v1_router, prefix="/api/v1", dependencies=[Depends(AppOrigin)])
 
 
 def init_listeners(app: FastAPI) -> None:
@@ -56,7 +57,6 @@ def init_middleware(app: FastAPI) -> None:
     app.add_middleware(
         AuthenticationMiddleware, backend=AuthBackend(), on_error=on_auth_error,
     )
-
 
 def create_app() -> FastAPI:
     app = FastAPI(

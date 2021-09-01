@@ -28,19 +28,18 @@ class UserUsecase:
 
     @Transaction(propagation=Propagation.REQUIRED)
     async def create_user(
-        self, email: str, password1: str, password2: str, nickname: str
+        self, email: str, password1: str, password2: str
     ) -> Union[User, NoReturn]:
         if password1 != password2:
             raise PasswordDoesNotMatchException
-
         if (
             session.query(User)
-            .filter(or_(User.email == email, User.nickname == nickname))
+            .filter(User.email == email)
             .first()
         ):
             raise DuplicateEmailOrNicknameException
 
-        user = User(email=email, password=password1, nickname=nickname)
+        user = User(email=email, password=password1)
         session.add(user)
 
         return user

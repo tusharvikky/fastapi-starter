@@ -3,7 +3,7 @@ from typing import Union
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker, Session
+from sqlalchemy.orm import scoped_session, sessionmaker, Session, Query
 
 from core.config import config
 
@@ -22,9 +22,11 @@ def reset_session_context(context: Token) -> None:
     session_context.reset(context)
 
 
-engine = create_engine(config.DB_URL, pool_recycle=3600)
+engine = create_engine(config.DB_URL, pool_recycle=3600, echo=True)
+
 session: Union[Session, scoped_session] = scoped_session(
     sessionmaker(autocommit=True, autoflush=False, bind=engine),
-    scopefunc=get_session_id,
+    scopefunc=get_session_id
 )
+
 Base = declarative_base()

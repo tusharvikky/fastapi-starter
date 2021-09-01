@@ -1,3 +1,4 @@
+from app.models.team import Team
 from contextvars import ContextVar
 from uuid import uuid4
 
@@ -22,6 +23,9 @@ class SQLAlchemyMiddleware(BaseHTTPMiddleware):
         session_id = str(uuid4())
         context = set_session_context(session_id=session_id)
 
+        # dont add here, will create issue in /docs route
+        # app_origin = request.headers.get('app-origin')
+        
         try:
             response = await call_next(request)
         except Exception as e:
