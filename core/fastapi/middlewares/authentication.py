@@ -34,7 +34,7 @@ class AuthBackend(AuthenticationBackend):
             payload = jwt.decode(
                 credentials, config.JWT_SECRET_KEY, algorithms=[config.JWT_ALGORITHM],
             )
-            user_id = payload.get("user_id")
+            user_id = payload.get("sub")
         except jwt.exceptions.PyJWTError:
             return False, current_user
 
